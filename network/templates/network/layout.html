@@ -1,0 +1,103 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}Social Network{% endblock %}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link href="//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+        <link href="{% static 'network/styles.css' %}" rel="stylesheet">
+                <!-- JQUERY first, then Popper.js, then Bootstrap JS -->
+      <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+        <script id="scripts" data-user="{{ user.username }}" src="{% static 'network/script.js' %}"></script>
+        {% block head %}
+          {% endblock %}
+    </head>
+    <body>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-sm-4 mx-sm-1 border">
+            <a class="navbar-brand" href="{% url 'index' %}">Network<img class="cover" src="{% static 'network/net3.png' %}" width="80" alt="net"></a>
+            <div class="ml-auto"></div>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="navbarNavDropdown" class="collapse navbar-collapse">
+              <ul class="navbar-nav mr-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#"><strong>{{ user.username }}</strong></a>
+                    </li>
+                {% endif %}
+                <li class="nav-item active"><a class="nav-link" href="{% url 'index' %}">All Posts</a></li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item active"><a class="nav-link" href="{% url 'following' %}">Following</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Log Out</a></li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Log In</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
+                {% endif %}
+              </ul>
+            </div>
+          </nav>
+          {% if messages %}
+                {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+
+        <div class="body">
+            {% block body %}
+            {% endblock %}
+
+            <div class="posts-paginator">
+               {% for post in page_obj %}
+                   <div  class="card post-card">
+                       <div class="card-body">
+                           <a href="{% url 'user' post.user %}"><h5>{{ post.user }}</h5></a>
+                           {% if post.user == user %}
+                               <button onclick="edit('{{ post.id }}');" id="edit-{{ post.id }}" class="btn btn-primary btn-sm">Edit</button>
+                           {% endif %}
+                           <p id="content-{{ post.id }}" style="white-space: pre-line">{{ post.content }}</p>
+                           {{ post.timestamp }}<br>
+                           <div onclick="like('{{ post.id }}');">
+                               {% if user in post.likes.all %}
+                     <a id="heart-{{ post.id }}"><span>&#9829;</span></a>
+                               {% else %}
+                     <a id="heart-{{ post.id }}"><span>&#9825;</span></a>
+                               {% endif %}
+                               <span id="counter-{{ post.id }}">{{ post.likes.all.count }}</span>
+                           </div>
+                       </div>
+                   </div>
+                   {% empty %}
+                    <h5>No posts</h5>
+                {% endfor %}
+
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <nav aria-label="Posts navigation">
+                            <ul class="pagination">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item"><a class="page-link" href="?page=1">&laquo; first</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">previous</a></li>
+                                {% endif %}
+
+                                <span class="current">&nbsp;Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}&nbsp;</span>
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">next</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a></li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

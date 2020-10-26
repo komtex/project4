@@ -1,0 +1,34 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block head %}
+    <script id="user" data-target="{{ target_user.username }}" src="{% static 'network/user.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+    <div class="row user-status">
+
+        <h3 class="col-auto mr-auto">{{ target_user.username }}</h3>
+
+        {% if user.is_authenticated %}
+            {% if user.id != target_user.id %}
+                <button id="follow-btn" class="btn btn-primary">
+                    {% if not user in target_user.followers.all %}
+                        Follow
+                    {% else %}
+                        Unfollow
+                    {% endif %}
+                </button>
+            {% endif %}
+        {% endif %}
+
+        <div class="col-auto">
+            <span>Followers: {{ target_user.followers.all.count }} </span>
+            <span>Following: {{ target_user.following.all.count }}</span>
+        </div>
+    </div>
+    <hr>
+
+    <div id="posts-holder">
+    </div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <h3>Wellcome!! All Posts</h3>
+
+    {% if user.is_authenticated %}
+        <div class="card">
+            <div class="card-body">
+                <form id="Npost" action="{% url 'new' %}" method="POST">
+                    <label>New Post</label>
+                    <textarea type="text" id="content" class="form-control" required placeholder="Write your post here"></textarea>
+                    <button class="btn btn-primary" type="submit">Publish</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        //check the user
+        if (!loggedUsername) {
+            return;
+        }
+        //create the post
+        document.querySelector('#Npost').onsubmit = () => {
+            fetch('/new', {
+                method: 'POST',
+                body: JSON.stringify({
+                    content: document.querySelector('#content').value
+                })
+            })
+                .then(response => response.json())
+                .then(() => {
+                    //clear the input
+                    document.querySelector('#content').value = "";
+
+                    location.reload(true);
+                });                  
+
+            return false;
+        }
+      });
+    </script>
+
+{% endblock %}
